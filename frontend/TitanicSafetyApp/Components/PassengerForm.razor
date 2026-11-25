@@ -1,0 +1,229 @@
+<EditForm FormName="TitanicPredictionForm" EditContext="_editContext" OnValidSubmit="HandleValidSubmitAsync">
+    <DataAnnotationsValidator />
+
+    <div class="form-section">
+        <div class="form-section-head">
+            <span class="form-section-index">01</span>
+            <div>
+                <h3 class="form-section-title">Profil penumpang</h3>
+                <p class="form-section-caption">Data identitas dasar penumpang.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="field field-wide">
+                <span class="field-label" id="pclass-label">Kelas penumpang</span>
+                <div class="segmented" role="radiogroup" aria-labelledby="pclass-label">
+                    @foreach (var option in ClassOptions)
+                    {
+                        <label class="segment-item @(_model.Pclass == option.Value ? "is-selected" : "")">
+                            <input type="radio" name="titanic-pclass" value="@option.Value"
+                                   checked="@(_model.Pclass == option.Value)"
+                                   @onchange="() => SetPclass(option.Value)" />
+                            <span class="segment-title">Kelas @option.Value</span>
+                            <span class="segment-hint">@option.Label</span>
+                        </label>
+                    }
+                </div>
+                <ValidationMessage For="@(() => _model.Pclass)" class="field-error" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="sex">Jenis kelamin</label>
+                <InputSelect id="sex" class="form-control" @bind-Value="_model.Sex">
+                    <option value="female">Perempuan</option>
+                    <option value="male">Laki-laki</option>
+                </InputSelect>
+                <p class="field-help">Jenis kelamin penumpang.</p>
+                <ValidationMessage For="@(() => _model.Sex)" class="field-error" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="age">Usia</label>
+                <div class="control-affix">
+                    <InputNumber id="age" class="form-control has-suffix" @bind-Value="_model.Age"
+                                 @oninput="() => NotifyChanged(nameof(PassengerFormModel.Age))" />
+                    <span class="control-suffix">tahun</span>
+                </div>
+                <p class="field-help">Usia penumpang saat keberangkatan.</p>
+                <ValidationMessage For="@(() => _model.Age)" class="field-error" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="title">Gelar</label>
+                <InputSelect id="title" class="form-control" @bind-Value="_model.Title">
+                    <option value="Mr">Mr</option>
+                    <option value="Mrs">Mrs</option>
+                    <option value="Miss">Miss</option>
+                    <option value="Master">Master</option>
+                    <option value="Rare">Lainnya</option>
+                </InputSelect>
+                <p class="field-help">Gelar yang tercantum pada data penumpang.</p>
+                <ValidationMessage For="@(() => _model.Title)" class="field-error" />
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-section-head">
+            <span class="form-section-index">02</span>
+            <div>
+                <h3 class="form-section-title">Detail perjalanan</h3>
+                <p class="form-section-caption">Informasi tiket, keluarga, dan kabin.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="sibsp">Saudara / pasangan</label>
+                <InputNumber id="sibsp" class="form-control" @bind-Value="_model.SibSp"
+                             @oninput="() => NotifyChanged(nameof(PassengerFormModel.SibSp))" />
+                <p class="field-help">Saudara kandung atau pasangan yang ikut.</p>
+                <ValidationMessage For="@(() => _model.SibSp)" class="field-error" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="parch">Orang tua / anak</label>
+                <InputNumber id="parch" class="form-control" @bind-Value="_model.Parch"
+                             @oninput="() => NotifyChanged(nameof(PassengerFormModel.Parch))" />
+                <p class="field-help">Orang tua atau anak yang ikut bersama.</p>
+                <ValidationMessage For="@(() => _model.Parch)" class="field-error" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="fare">Tarif tiket</label>
+                <div class="control-affix">
+                    <span class="control-prefix">&pound;</span>
+                    <InputNumber id="fare" class="form-control has-prefix" @bind-Value="_model.Fare"
+                                 @oninput="() => NotifyChanged(nameof(PassengerFormModel.Fare))" />
+                </div>
+                <p class="field-help">Tarif dalam pound sterling (GBP).</p>
+                <ValidationMessage For="@(() => _model.Fare)" class="field-error" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="embarked">Pelabuhan keberangkatan</label>
+                <InputSelect id="embarked" class="form-control" @bind-Value="_model.Embarked">
+                    <option value="S">Southampton</option>
+                    <option value="C">Cherbourg</option>
+                    <option value="Q">Queenstown</option>
+                </InputSelect>
+                <p class="field-help">Pelabuhan tempat penumpang naik kapal.</p>
+                <ValidationMessage For="@(() => _model.Embarked)" class="field-error" />
+            </div>
+
+            <div class="field field-wide">
+                <label class="field-label" for="hasCabin">Data kabin</label>
+                <div class="check-control">
+                    <InputCheckbox id="hasCabin" class="form-check-input" @bind-Value="_model.HasCabin" />
+                    <div class="check-copy">
+                        <label class="check-title" for="hasCabin">Nomor kabin tercatat</label>
+                        <p class="field-help mb-0">Centang jika nomor kabin tersedia.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ValidationSummary class="validation-summary" />
+
+    <div class="form-action-bar">
+        <div class="action-secondary">
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => ApplyPreset(true)">
+                Preset: Kelas 1
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => ApplyPreset(false)">
+                Preset: Kelas 3
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" @onclick="ResetForm">
+                <AppIcon Name="refresh" Size="14" />
+                <span>Reset</span>
+            </button>
+        </div>
+        <button type="submit" class="btn btn-primary btn-submit" disabled="@IsSubmitting">
+            @if (IsSubmitting)
+            {
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span>Memproses...</span>
+            }
+            else
+            {
+                <span>Jalankan Prediksi</span>
+                <AppIcon Name="arrow-right" Size="16" />
+            }
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public bool IsSubmitting { get; set; }
+
+    [Parameter] public EventCallback<PassengerFormModel> OnSubmitRequested { get; set; }
+
+    [Parameter] public EventCallback OnInputsChanged { get; set; }
+
+    [Parameter] public EventCallback OnResetRequested { get; set; }
+
+    private PassengerFormModel _model = new();
+
+    private EditContext _editContext = default!;
+
+    private static readonly (int Value, string Label)[] ClassOptions =
+    [
+        (1, "First Class"),
+        (2, "Bussiness Class"),
+        (3, "Economy Class")
+    ];
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(_model);
+    }
+
+    private void NotifyChanged(string fieldName)
+    {
+        _editContext.NotifyFieldChanged(new FieldIdentifier(_model, fieldName));
+        _ = OnInputsChanged.InvokeAsync();
+    }
+
+    private void SetPclass(int value)
+    {
+        _model.Pclass = value;
+        NotifyChanged(nameof(PassengerFormModel.Pclass));
+    }
+
+    private async Task HandleValidSubmitAsync()
+    {
+        if (IsSubmitting)
+        {
+            return;
+        }
+
+        await OnSubmitRequested.InvokeAsync(_model);
+    }
+
+    private void ApplyPreset(bool firstClass)
+    {
+        _model = firstClass
+            ? new PassengerFormModel
+            {
+                Pclass = 1, Sex = "female", Age = 35, Title = "Mrs",
+                SibSp = 1, Parch = 0, Fare = 80, Embarked = "C", HasCabin = true
+            }
+            : new PassengerFormModel
+            {
+                Pclass = 3, Sex = "male", Age = 22, Title = "Mr",
+                SibSp = 0, Parch = 0, Fare = 7.25, Embarked = "S", HasCabin = false
+            };
+
+        _editContext = new EditContext(_model);
+        _ = OnInputsChanged.InvokeAsync();
+    }
+
+    private void ResetForm()
+    {
+        _model = new PassengerFormModel();
+        _editContext = new EditContext(_model);
+        _ = OnResetRequested.InvokeAsync();
+    }
+}

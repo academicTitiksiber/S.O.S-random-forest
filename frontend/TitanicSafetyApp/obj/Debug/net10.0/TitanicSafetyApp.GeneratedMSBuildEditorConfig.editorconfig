@@ -1,0 +1,56 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EntryPointFilePath = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = TitanicSafetyApp
+build_property.RootNamespace = TitanicSafetyApp
+build_property.ProjectDir = /Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 10.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/App.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BcHAucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTWFpbkxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9JbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/PassengerForm.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYXNzZW5nZXJGb3JtLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/PredictionResult.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QcmVkaWN0aW9uUmVzdWx0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Sb3V0ZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/Components/Ui/AppIcon.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9VaS9BcHBJY29uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/flashdrive.ghxfarr/ghxfarr/0003/President University/Profesional-Class/Artificial-Intelligence/S.O.S/frontend/TitanicSafetyApp/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 

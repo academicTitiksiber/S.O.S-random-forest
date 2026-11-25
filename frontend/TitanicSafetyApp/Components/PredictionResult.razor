@@ -1,0 +1,147 @@
+<section class="panel result-panel" aria-busy="@IsLoading">
+    <div class="panel-head">
+        <span class="panel-head-icon"><AppIcon Name="chart" Size="17" /></span>
+        <div>
+            <h2 class="panel-title">Analisis prediksi</h2>
+            <p class="panel-subtitle">Estimasi keselamatan penumpang</p>
+        </div>
+    </div>
+
+    <div class="result-body">
+        @if (Result is null || Input is null)
+        {
+            <div class="empty-state">
+                <span class="empty-icon"><AppIcon Name="activity" Size="20" /></span>
+                <h3 class="empty-title">Menunggu data penumpang</h3>
+                <p class="empty-copy">
+                    Isi parameter di sebelah kiri, lalu jalankan prediksi untuk melihat
+                    estimasi probabilitas dan ringkasan hasilnya.
+                </p>
+                <div class="empty-meta">
+                    <span><AppIcon Name="users" Size="14" /> Profil penumpang</span>
+                    <span><AppIcon Name="ticket" Size="14" /> Detail perjalanan</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            var survivedPercent = Result.ProbabilitySurvived * 100;
+            var lostPercent = Result.ProbabilityNotSurvived * 100;
+            var survivedWidth = survivedPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+            var lostWidth = lostPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+            var survivedText = survivedPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+            var lostText = lostPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+            var fareText = Input.Fare.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+            var ageText = Input.Age.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+
+            <div class="result-content">
+                @if (IsStale)
+                {
+                    <div class="stale-note" role="status">
+                        <AppIcon Name="info" Size="14" />
+                        <span>Parameter diubah. Jalankan prediksi ulang untuk memperbarui hasil.</span>
+                    </div>
+                }
+
+                <div class="verdict-row">
+                    <span class="meta-label">Klasifikasi</span>
+                    <span class="verdict-badge @(Result.Survived == 1 ? "verdict-survived" : "verdict-lost")">
+                        <AppIcon Name="@(Result.Survived == 1 ? "check" : "close")" Size="14" />
+                        @Result.Label
+                    </span>
+                </div>
+
+                <div class="probability-card">
+                    <div class="probability-hero">
+                        <span class="probability-value">@survivedText<span class="probability-unit">%</span></span>
+                        <span class="probability-description">Probabilitas selamat</span>
+                    </div>
+                    <div class="probability-track" role="progressbar" aria-label="Probabilitas selamat"
+                         aria-valuenow="@survivedText" aria-valuemin="0" aria-valuemax="100">
+                        <div class="probability-fill" style="width: @survivedWidth%"></div>
+                    </div>
+                    <div class="probability-legend">
+                        <span><i class="legend-dot legend-safe"></i>Selamat <strong>@survivedText%</strong></span>
+                        <span><i class="legend-dot legend-risk"></i>Tidak selamat <strong>@lostText%</strong></span>
+                    </div>
+                </div>
+
+                <div class="risk-row">
+                    <span class="meta-label">Tingkat risiko</span>
+                    <span class="risk-badge @RiskClass(Result.RiskLevel)">
+                        <i class="risk-dot"></i>@Result.RiskLevel
+                    </span>
+                </div>
+
+                <div class="result-block">
+                    <h3 class="block-heading">Ringkasan parameter</h3>
+                    <dl class="param-list">
+                        <div><dt>Kelas penumpang</dt><dd>Kelas @Input.Pclass &middot; @ClassLabel(Input.Pclass)</dd></div>
+                        <div><dt>Jenis kelamin</dt><dd>@SexLabel(Input.Sex)</dd></div>
+                        <div><dt>Usia</dt><dd>@ageText tahun</dd></div>
+                        <div><dt>Tarif tiket</dt><dd>&pound;@fareText</dd></div>
+                        <div><dt>Data kabin</dt><dd>@(Input.HasCabin ? "Tercatat" : "Tidak tercatat")</dd></div>
+                        <div><dt>Ukuran keluarga</dt><dd>@(Input.SibSp + Input.Parch + 1) orang</dd></div>
+                    </dl>
+                </div>
+
+                <div class="result-block">
+                    <h3 class="block-heading">Faktor yang memengaruhi estimasi</h3>
+                    <p class="block-note">Ringkasan berdasarkan parameter yang dimasukkan.</p>
+                    <ul class="factor-list">
+                        @foreach (var factor in Factors)
+                        {
+                            <li>
+                                <span class="factor-icon @(factor.SupportsSurvival ? "factor-positive" : "factor-negative")">
+                                    <AppIcon Name="@(factor.SupportsSurvival ? "check" : "close")" Size="12" />
+                                </span>
+                                <span>
+                                    <strong>@factor.Title.</strong>
+                                    <span class="factor-copy">@factor.Description</span>
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
+        @if (IsLoading)
+        {
+            <div class="result-overlay" role="status" aria-live="polite">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span>Menghitung estimasi...</span>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public PredictionResponse? Result { get; set; }
+
+    [Parameter] public PassengerFormModel? Input { get; set; }
+
+    [Parameter] public bool IsLoading { get; set; }
+
+    [Parameter] public bool IsStale { get; set; }
+
+    private IReadOnlyList<FactorInsight> Factors => Input is null
+        ? []
+        : FactorExplainer.Explain(Input);
+
+    private static string SexLabel(string sex) => sex == "female" ? "Perempuan" : "Laki-laki";
+
+    private static string ClassLabel(int pclass) => pclass switch
+    {
+        1 => "First Class",
+        2 => "Business Class",
+        _ => "Economy Class"
+    };
+
+    private static string RiskClass(string risk) => risk switch
+    {
+        "Rendah" => "risk-low",
+        "Sedang" => "risk-medium",
+        _ => "risk-high"
+    };
+}

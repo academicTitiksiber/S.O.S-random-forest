@@ -1,0 +1,218 @@
+@page "/"
+@rendermode InteractiveServer
+@inject ITitanicApiClient ApiClient
+
+<PageTitle>Prediksi Keselamatan Penumpang Titanic</PageTitle>
+
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="topbar-brand">
+                <span class="brand-glyph"><AppIcon Name="shield" Size="16" /></span>
+                <span class="brand-name">S.O.S</span>
+            </div>
+            <div class="topbar-right">
+                <span class="service-status @(_backendOnline ? "service-online" : "service-offline")" role="status">
+                    <i class="status-dot" aria-hidden="true"></i>
+                    @(_backendOnline ? "Layanan aktif" : "Layanan tidak tersedia")
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="workspace">
+        <div class="page-heading">
+            <div>
+                <p class="page-eyebrow">PREDICTION WORKSPACE</p>
+                <h1 class="page-title">Prediksi Keselamatan Penumpang</h1>
+                <p class="page-subtitle">
+                    Estimasi peluang selamat berdasarkan profil dan detail perjalanan penumpang.
+                </p>
+            </div>
+            <div class="page-meta">
+                <span class="meta-chip"><AppIcon Name="activity" Size="14" /> Random Forest</span>
+                <span class="meta-chip">v1.0</span>
+            </div>
+        </div>
+
+        @if (_backendProblem is not null)
+        {
+            <div class="notice notice-warning" role="alert">
+                <AppIcon Name="alert" Size="16" />
+                <div class="notice-copy">
+                    <strong>Layanan prediksi tidak tersedia.</strong>
+                    <span>@_backendProblem</span>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="RecheckHealthAsync"
+                        disabled="@_isCheckingHealth">
+                    @(_isCheckingHealth ? "Memeriksa..." : "Coba lagi")
+                </button>
+            </div>
+        }
+
+        @if (_errorMessage is not null)
+        {
+            <div class="notice notice-error" role="alert">
+                <AppIcon Name="alert" Size="16" />
+                <div class="notice-copy">
+                    <strong>Prediksi tidak dapat diselesaikan.</strong>
+                    <span>@_errorMessage</span>
+                    @if (_errorCode is not null)
+                    {
+                        <span class="error-code">@_errorCode</span>
+                    }
+                </div>
+                <button type="button" class="notice-dismiss" @onclick="DismissError" aria-label="Tutup notifikasi">
+                    <AppIcon Name="close" Size="14" />
+                </button>
+            </div>
+        }
+
+        <div class="row g-4 workspace-grid">
+            <div class="col-lg-7">
+                <section class="panel form-panel">
+                    <div class="panel-head">
+                        <span class="panel-head-icon"><AppIcon Name="users" Size="17" /></span>
+                        <div>
+                            <h2 class="panel-title">Parameter penumpang</h2>
+                            <p class="panel-subtitle">Lengkapi data sebelum menjalankan prediksi.</p>
+                        </div>
+                    </div>
+                    <PassengerForm IsSubmitting="_isLoading"
+                                   OnSubmitRequested="HandlePredictAsync"
+                                   OnInputsChanged="HandleInputsChanged"
+                                   OnResetRequested="HandleResetRequested" />
+                </section>
+            </div>
+            <div class="col-lg-5 result-column">
+                <PredictionResult Result="_result"
+                                  Input="_lastInput"
+                                  IsLoading="_isLoading"
+                                  IsStale="_isStale" />
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-inner">
+            <span>S.O.C &middot; Survival Outcome System</span>
+            <span>Hasil estimasi bersifat statistik dan bukan jaminan individu.</span>
+        </div>
+    </footer>
+</div>
+
+@code {
+    private bool _isLoading;
+    private bool _isCheckingHealth;
+    private bool _backendOnline;
+    private bool _isStale;
+    private string? _backendProblem;
+    private string? _errorMessage;
+    private string? _errorCode;
+    private PredictionResponse? _result;
+    private PassengerFormModel? _lastInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckHealthAsync();
+    }
+
+    private async Task CheckHealthAsync()
+    {
+        _isCheckingHealth = true;
+        try
+        {
+            var health = await ApiClient.GetHealthAsync();
+            _backendOnline = health.ModelLoaded;
+            _backendProblem = health.ModelLoaded ? null : health.Message;
+        }
+        catch (TitanicApiException ex)
+        {
+            _backendOnline = false;
+            _backendProblem = ex.Message;
+        }
+        catch (Exception)
+        {
+            _backendOnline = false;
+            _backendProblem = "Pemeriksaan layanan gagal. Periksa koneksi dan coba lagi.";
+        }
+        finally
+        {
+            _isCheckingHealth = false;
+        }
+    }
+
+    private async Task RecheckHealthAsync()
+    {
+        await CheckHealthAsync();
+    }
+
+    private void HandleResetRequested()
+    {
+        _result = null;
+        _lastInput = null;
+        _isStale = false;
+        _errorMessage = null;
+        _errorCode = null;
+    }
+
+    private void HandleInputsChanged()
+    {
+        if (_result is not null)
+        {
+            _isStale = true;
+        }
+    }
+
+    private async Task HandlePredictAsync(PassengerFormModel input)
+    {
+        _errorMessage = null;
+        _errorCode = null;
+        _isLoading = true;
+        _lastInput = new PassengerFormModel
+        {
+            Pclass = input.Pclass,
+            Sex = input.Sex,
+            Age = input.Age,
+            SibSp = input.SibSp,
+            Parch = input.Parch,
+            Fare = input.Fare,
+            Embarked = input.Embarked,
+            Title = input.Title,
+            HasCabin = input.HasCabin
+        };
+
+        try
+        {
+            _result = await ApiClient.PredictAsync(input.ToRequest());
+            _isStale = false;
+            _backendOnline = true;
+            _backendProblem = null;
+        }
+        catch (TitanicApiException ex)
+        {
+            _errorMessage = ex.Message;
+            _errorCode = ex.Code;
+            if (ex.Code is "CONNECTION_ERROR" or "TIMEOUT")
+            {
+                _backendOnline = false;
+                _backendProblem = ex.Message;
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Permintaan gagal diproses. Muat ulang halaman dan coba lagi.";
+            _errorCode = "CLIENT_ERROR";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void DismissError()
+    {
+        _errorMessage = null;
+        _errorCode = null;
+    }
+}
